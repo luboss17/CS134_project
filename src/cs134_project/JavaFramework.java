@@ -34,9 +34,10 @@ public class JavaFramework {
 
     // Size of the sprite.
     private static int[] spriteSize = new int[2];
+    private static final int[] shipsize= {30,30};
     
     //variables for camera moving
-    private static int cam=1000;//initial value for cam=1sec=1000ms
+    private static int cam=50;//initial value for cam=1sec=1000ms
     private static final int roundtime=60000;//change speed of cam every 60sec=60,000ms
     private static byte firstframecheck=0;
     private static long frametime;
@@ -121,6 +122,7 @@ public class JavaFramework {
         
         // Load the texture.
         spriteTex = glTexImageTGAFile(gl, "swagship.tga", spriteSize);
+        spriteSize=shipsize;
         boolean left_or_right=true;//true for facing right, false for facing left
         
         //initiate cam
@@ -183,7 +185,7 @@ public class JavaFramework {
             }
             gl.glClearColor(0, 0, 0, 1);
             gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
-            glDrawSprite(gl, spriteTex, spritePos[0], spritePos[1], spriteSize[0], spriteSize[1],left_or_right);
+            glDrawSprite(gl, spriteTex, spritePos[0], spritePos[1], spriteSize[0], spriteSize[1],true);
 
             // Present to the player.
             //window.swapBuffers();
