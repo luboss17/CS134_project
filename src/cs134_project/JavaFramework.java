@@ -183,6 +183,9 @@ public class JavaFramework {
             }
             gl.glClearColor(0, 0, 0, 1);
             gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
+            
+            
+//            update sprites and locations
             glDrawSprite(gl, spriteTex, spritePos[0], spritePos[1], spriteSize[0], spriteSize[1],left_or_right);
 
             // Present to the player.
