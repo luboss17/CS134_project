@@ -12,6 +12,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.GLProfile;
+import java.util.Random;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -30,7 +31,7 @@ public class JavaFramework {
     private static int[] spritePos = new int[] { 320, 240 };
 
     // Texture for the sprite.
-    private static int spriteTex;
+    private static int spriteTex, weed1, weed2, weed3, bg;
 
     // Size of the sprite.
     private static int[] spriteSize = new int[2];
@@ -41,7 +42,8 @@ public class JavaFramework {
     private static byte firstframecheck=0;
     private static long frametime;
     private static long firstframe,secondframe,beginstage=0,endstage=60000,lastcammove,endmove,currtime;
-    
+    static int height = 480;
+    static int[] difficulty = [3000, 2500, 2000, 1500, 1000, 500, 100];
 
     //get time in ms
     public static long gettime()
@@ -68,6 +70,11 @@ public class JavaFramework {
         
     }
     public static void main(String[] args) {
+        ArrayList<Integer> obstacles = new ArrayList<>();
+        ArrayList<int[]> obstaclepos = new ArrayList<>();
+        int difficultylvl = 0;
+        int counter = 0;
+        int gcounter = 0;
         GLProfile gl2Profile;
 
         try {
@@ -121,7 +128,12 @@ public class JavaFramework {
         
         // Load the texture.
         spriteTex = glTexImageTGAFile(gl, "swagship.tga", spriteSize);
+        weed1 = glTexImageTGAFile(gl, "weed1.tga", spriteSize);
+        weed2 = glTexImageTGAFile(gl, "weed2.tga", spriteSize);
+        weed3 = glTexImageTGAFile(gl, "weed3.tga", spriteSize);
+        bg = glTexImageTGAFile(gl, "bg.tga", spriteSize);
         boolean left_or_right=true;//true for facing right, false for facing left
+        
         
         //initiate cam
         Camera camera=new Camera();
@@ -187,7 +199,13 @@ public class JavaFramework {
             
 ///////////////////////////////////////////////////////////update sprites and locations ///////////////////////////////////////////////////////////
             
-            // TODO randgen, obstacles, background
+            counter++;
+            gcounter++;
+
+//            draw background
+            glDrawSprite(gl, bg, 0, 0, spriteSize[0], spriteSize[1],left_or_right);
+            
+            updateObstacles(obstacles, obstaclepos, left_or_right, counter, difficultylvl);
             
             glDrawSprite(gl, spriteTex, spritePos[0], spritePos[1], spriteSize[0], spriteSize[1],left_or_right);
 
@@ -195,6 +213,48 @@ public class JavaFramework {
             //window.swapBuffers();
         }
         System.exit(0);
+    }
+    
+    public static void updateObstacles(ArrayList<Integer> obstacles, ArrayList<int[]> obstaclepos, boolean lor, int counter, int difficultylvl) {
+        
+    	
+//    	add obstacle
+    	if (counter % difficulty[difficultylvl] == 0) {
+//    		rand gen to choose one of the 3 weed icons
+    		int randweed = 0; 
+    		if (randweed == 0) {
+    			obstacles.add(weed1);
+    		} else if (randweed == 1) {
+    			obstacles.add(weed2);
+    		} else if (randweed == 2) {
+    			obstacles.add(weed3);
+    		}
+
+        	Random rand; // TODO give it random val from -300 to 480 unless you change the size of the weed icons. 
+    		int[] pos = new int[]{640,rand};
+    		
+    		obstaclepos.add(pos);
+    	}
+
+//    	increase difficulty
+    	if (counter % 3000 == 0) {
+    		counter = 0;
+    		difficultylvl++;
+    	}
+    	
+    	for (int i = 0; i < obstaclepos.length(); i++){
+    		if (obstacles.get(i)[0] <= -660){
+    			// remove that obstacle
+    			obstacles.remove(i);
+    			obstaclepos.remove(i);
+    		} else {
+    			obstaclepos.get(i)[0]--;
+    		}
+    	}
+    	
+    	for (int i  = 0; i < obstacles.length() ; i++) {
+    		glDrawSprite(gl,obstacles.get(i),obstaclepos.get(i)[0], obstaclepos.get(i)[1], spriteSize[0],spriteSize[1], lor );
+    	}
     }
 
     // Load a file into an OpenGL texture and return that texture.
