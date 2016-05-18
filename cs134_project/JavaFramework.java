@@ -16,6 +16,7 @@ import java.util.Random;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class JavaFramework {
     // Set this to true to force the game to exit.
@@ -43,7 +44,7 @@ public class JavaFramework {
     private static long frametime;
     private static long firstframe,secondframe,beginstage=0,endstage=60000,lastcammove,endmove,currtime;
     static int height = 480;
-    static int[] difficulty = [3000, 2500, 2000, 1500, 1000, 500, 100];
+    static int[] difficulty = new int[]{3000, 2500, 2000, 1500, 1000, 500, 100};
 
     //get time in ms
     public static long gettime()
@@ -70,6 +71,7 @@ public class JavaFramework {
         
     }
     public static void main(String[] args) {
+        int bgx1 = 0, bgy1 = 0, bgx2 = 0, bgy2 = 0;
         ArrayList<Integer> obstacles = new ArrayList<>();
         ArrayList<int[]> obstaclepos = new ArrayList<>();
         int difficultylvl = 0;
@@ -202,10 +204,12 @@ public class JavaFramework {
             counter++;
             gcounter++;
 
-//            draw background
-            glDrawSprite(gl, bg, 0, 0, spriteSize[0], spriteSize[1],left_or_right);
+//            TODO draw background
+            if ()
+            glDrawSprite(gl, bg, bgx1, bgy1, spriteSize[0], spriteSize[1],left_or_right);
             
-            updateObstacles(obstacles, obstaclepos, left_or_right, counter, difficultylvl);
+//            draw obstacles
+            updateObstacles(gl,obstacles, obstaclepos, left_or_right, counter, difficultylvl);
             
             glDrawSprite(gl, spriteTex, spritePos[0], spritePos[1], spriteSize[0], spriteSize[1],left_or_right);
 
@@ -215,23 +219,24 @@ public class JavaFramework {
         System.exit(0);
     }
     
-    public static void updateObstacles(ArrayList<Integer> obstacles, ArrayList<int[]> obstaclepos, boolean lor, int counter, int difficultylvl) {
-        
-    	
+    public static void updateObstacles(GL2 gl,ArrayList<Integer> obstacles, ArrayList<int[]> obstaclepos, boolean lor, int counter, int difficultylvl) {
 //    	add obstacle
     	if (counter % difficulty[difficultylvl] == 0) {
 //    		rand gen to choose one of the 3 weed icons
-    		int randweed = 0; 
-    		if (randweed == 0) {
-    			obstacles.add(weed1);
-    		} else if (randweed == 1) {
-    			obstacles.add(weed2);
-    		} else if (randweed == 2) {
-    			obstacles.add(weed3);
-    		}
-
-        	Random rand; // TODO give it random val from -300 to 480 unless you change the size of the weed icons. 
-    		int[] pos = new int[]{640,rand};
+    		Random random = new Random();
+                int randweed = random.nextInt(3);
+                switch(randweed){
+                    case 0:
+                        obstacles.add(weed1);
+                        break;
+                    case 1:
+                        obstacles.add(weed2);
+                        break;
+                    case 2:
+                        obstacles.add(weed3);
+                }
+        	int randy = random.nextInt(780) - 300; // TODO give it random val from -300 to 480 unless you change the size of the weed icons. 
+    		int[] pos = new int[]{640,randy};
     		
     		obstaclepos.add(pos);
     	}
@@ -242,8 +247,8 @@ public class JavaFramework {
     		difficultylvl++;
     	}
     	
-    	for (int i = 0; i < obstaclepos.length(); i++){
-    		if (obstacles.get(i)[0] <= -660){
+    	for (int i = 0; i < obstaclepos.size(); i++){
+    		if (obstaclepos.get(i)[0] <= -300){
     			// remove that obstacle
     			obstacles.remove(i);
     			obstaclepos.remove(i);
@@ -252,7 +257,7 @@ public class JavaFramework {
     		}
     	}
     	
-    	for (int i  = 0; i < obstacles.length() ; i++) {
+    	for (int i  = 0; i < obstacles.size() ; i++) {
     		glDrawSprite(gl,obstacles.get(i),obstaclepos.get(i)[0], obstaclepos.get(i)[1], spriteSize[0],spriteSize[1], lor );
     	}
     }
