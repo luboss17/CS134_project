@@ -35,7 +35,13 @@ public class JavaFramework {
     private static int spriteTex, weed1, weed2, weed3, bg1, bg2;
 
     // Size of the sprite.
-    private static int[] spriteSize = new int[2];
+    private static int[] spriteSize = new int[]{50, 50};
+    private static int[] obstaclesSize = new int[]{150, 150};
+    private static int[] bgSize = new int[]{1917, 480};
+    private static int obsspeed = 1;
+    private static int limit = 50;
+//    spriteSize[0] = 50;
+//    spriteSize[1] = 50;
 
     //variables for camera moving
     private static int cam = 1000;//initial value for cam=1sec=1000ms
@@ -45,7 +51,7 @@ public class JavaFramework {
     private static long firstframe, secondframe, beginstage = 0, endstage = 60000, lastcammove, endmove, currtime;
     static int height = 480;
     static int width = 640;
-    static int[] difficulty = new int[]{3000, 2500, 2000, 1500, 1000, 500, 100};
+    static int[] difficulty = new int[]{2000, 1500, 1000, 500, 100};
 
     //get time in ms
     public static long gettime() {
@@ -73,6 +79,7 @@ public class JavaFramework {
         ArrayList<int[]> obstaclepos = new ArrayList<>();
         int difficultylvl = 0;
         int counter = 0;
+        int gcounter = 0;
         GLProfile gl2Profile;
 
         try {
@@ -119,12 +126,12 @@ public class JavaFramework {
         gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
         // Load the texture.
-        spriteTex = glTexImageTGAFile(gl, "swagship.tga", spriteSize);
-        weed1 = glTexImageTGAFile(gl, "weed1.tga", spriteSize);
-        weed2 = glTexImageTGAFile(gl, "weed2.tga", spriteSize);
-        weed3 = glTexImageTGAFile(gl, "weed3.tga", spriteSize);
-        bg1 = glTexImageTGAFile(gl, "bg.tga", spriteSize);
-        bg2 = glTexImageTGAFile(gl, "bg.tga", spriteSize);
+        spriteTex = glTexImageTGAFile(gl, "swagship.tga", obstaclesSize);
+        weed1 = glTexImageTGAFile(gl, "weed1.tga", obstaclesSize);
+        weed2 = glTexImageTGAFile(gl, "weed2.tga", obstaclesSize);
+        weed3 = glTexImageTGAFile(gl, "weed3.tga", obstaclesSize);
+        bg1 = glTexImageTGAFile(gl, "bg.tga", obstaclesSize);
+        bg2 = glTexImageTGAFile(gl, "bg.tga", obstaclesSize);
         boolean left_or_right = true;//true for facing right, false for facing left
 
         //initiate cam
@@ -187,6 +194,7 @@ public class JavaFramework {
 
 ///////////////////////////////////////////////////////////update sprites and locations ///////////////////////////////////////////////////////////
             counter++;
+            gcounter++;
 
 //            TODO draw background
             if (bgx1 < -1920) {
@@ -194,12 +202,16 @@ public class JavaFramework {
             } else if (bgx2 < -1920) {
                 bgx2 = bgx1 + 1917;
             }
-                glDrawSprite(gl, bg2, bgx2--, 0, spriteSize[0], spriteSize[1], left_or_right);
-                glDrawSprite(gl, bg1, bgx1--, 0, spriteSize[0], spriteSize[1], left_or_right);
+            glDrawSprite(gl, bg2, bgx2--, 0, bgSize[0], bgSize[1], true);
+            glDrawSprite(gl, bg1, bgx1--, 0, bgSize[0], bgSize[1], true);
 
 //            draw obstacles
-            updateObstacles(gl, obstacles, obstaclepos, left_or_right, counter, difficultylvl);
+            updateObstacles(gl, obstacles, obstaclepos, left_or_right, counter,gcounter, difficultylvl);
 
+            
+            if (counter > limit){
+                counter = 0;
+            }
             glDrawSprite(gl, spriteTex, spritePos[0], spritePos[1], spriteSize[0], spriteSize[1], left_or_right);
 
             // Present to the player.
@@ -208,9 +220,10 @@ public class JavaFramework {
         System.exit(0);
     }
 
-    public static void updateObstacles(GL2 gl, ArrayList<Integer> obstacles, ArrayList<int[]> obstaclepos, boolean lor, int counter, int difficultylvl) {
+    public static void updateObstacles(GL2 gl, ArrayList<Integer> obstacles, ArrayList<int[]> obstaclepos, boolean lor, int counter,int gcounter, int difficultylvl) {
 //    	add obstacle
-        if (counter % difficulty[difficultylvl] == 0) {
+//        if (counter == difficulty[difficultylvl]) {
+            if (counter == limit){
 //    		rand gen to choose one of the 3 weed icons
             Random random = new Random();
             int randweed = random.nextInt(3);
@@ -229,12 +242,20 @@ public class JavaFramework {
 
             obstaclepos.add(pos);
         }
+            if(gcounter % 100 == 0) {
+//                obsspeed+= 2;
+                  obsspeed++;
+                  if (limit - 2 >= 2)
+                    limit-=2;
+            }
 
 //    	increase difficulty
-        if (counter % 3000 == 0) {
-            counter = 0;
-            difficultylvl++;
-        }
+//        if (counter % 1000 == 0) {
+//            counter = 0;
+//            if (difficultylvl != 5) {
+//                difficultylvl++;
+//            }
+//        }
 
         for (int i = 0; i < obstaclepos.size(); i++) {
             if (obstaclepos.get(i)[0] <= -300) {
@@ -242,12 +263,12 @@ public class JavaFramework {
                 obstacles.remove(i);
                 obstaclepos.remove(i);
             } else {
-                obstaclepos.get(i)[0]--;
+                obstaclepos.get(i)[0]-= obsspeed;
             }
         }
 
         for (int i = 0; i < obstacles.size(); i++) {
-            glDrawSprite(gl, obstacles.get(i), obstaclepos.get(i)[0], obstaclepos.get(i)[1], spriteSize[0], spriteSize[1], lor);
+            glDrawSprite(gl, obstacles.get(i), obstaclepos.get(i)[0], obstaclepos.get(i)[1], spriteSize[0], spriteSize[1], true);
         }
     }
 
